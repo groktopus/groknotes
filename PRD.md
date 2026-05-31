@@ -1,298 +1,359 @@
 # GrokNotes — Product Requirements Document
 
-> **Status:** Ideation / Pre-Alpha
-> **Owner:** Magnus Hedemark (groktopus)
-> **Last Updated:** 2026-05-31
+**Status:** Ideation / Pre-Alpha
+**Owner:** Magnus Hedemark (groktopus)
+**Last updated:** 2026-05-31
 
 ---
 
 ## 1. Elevator Pitch
 
-Obsidian is the best knowledge management tool in existence — but its graph is made of links *you already know to make*. GrokNotes adds a semantic layer underneath: it knows what your notes actually *mean*, surfaces connections you've missed, bundles curated context you can reuse, and lets you talk to AI with that context injected — all without leaving your vault.
+Obsidian's graph shows you what you've deliberately connected. GrokNotes shows you what your notes *actually mean* — and surfaces what you're missing. Semantic discovery. Gap detection. Curated context bundles. AI chat that knows what you're working on. All without leaving your vault.
 
 ---
 
-## 2. Problem Statement
+## 2. Opportunity Solution Tree
 
-Obsidian excels at building knowledge through deliberate connection. But three gaps persist:
+An Opportunity Solution Tree connects desired outcomes to customer needs, then to solutions. This keeps us from building features before we've verified the problem.
 
-**Gap 1 — Discovery is manual and binary.** You can only discover notes you've explicitly [[wikilinked]]. The vault knows every word you've written, but it can't tell you "these 4 notes are about the same concept" unless you already connected them. Semantic similarity — the ability to find notes that *talk about the same thing* even when they never mention each other — requires an external vector layer that Obsidian doesn't ship.
+```
 
-**Gap 2 — You don't know what you're missing.** The most valuable connections are the ones you *haven't made yet*. A note about LoRa modulation limits and a note about MeshCore payload design might both live in your vault, share a subject, and never cross-reference each other. No existing tool surfaces these structural holes. The absence of a link can be as informative as its presence — but only if you have a way to *see the absence*.
+DESIRED OUTCOME
+   Users maintain higher-value knowledge graphs with less effort,
+   and AI interactions are grounded in curated vault context
 
-**Gap 3 — Context is trapped in notes.** When you want to work with AI on a specific project, you have to manually gather relevant notes, paste them in, and repeat the exercise every session. There's no concept of a *named, reusable, curated context bundle* that persists across sessions, auto-updates as your notes evolve, and can be injected with one click.
+├─ OPPORTUNITY 1: "I know a note about this exists somewhere,
+│   but I can't find it without remembering the exact title"
+│   │
+│   ├─ Solution A: Semantic similarity panel for the active note
+│   │   └─ Test: Can a user find a relevant note they'd forgotten?
+│   │
+│   └─ Solution B: Full-vault semantic search (beyond Obsidian's
+│       existing search which is keyword-only)
+│       └─ Test: Does this replace or supplement the existing search?
+│
+├─ OPPORTUNITY 2: "I don't know what connections I'm missing
+│   between notes I've already written"
+│   │
+│   ├─ Solution C: Gap overlay — show unlinked similar notes
+│   │   └─ Test: Do users actually create links when shown the gap?
+│   │
+│   ├─ Solution D: Periodic "graph health" report
+│   │   └─ Test: Weekly email vs in-plugin dashboard?
+│   │
+│   └─ Solution E: AI-suggested synthesis for orphan concepts
+│       └─ Test: Willing to pay token cost for auto-synthesis?
+│
+├─ OPPORTUNITY 3: "Every time I start a project session,
+│   I spend 10 minutes gathering context I've gathered before"
+│   │
+│   ├─ Solution F: Named, durable, curated context bundles
+│   │   └─ Test: Do users reuse bundles across sessions?
+│   │
+│   ├─ Solution G: Auto-suggested bundles from note clusters
+│   │   └─ Test: Are auto-suggestions accurate enough to use?
+│   │
+│   └─ Solution H: One-click bundle → clipboard / AI inject
+│       └─ Test: Does this reduce time-to-first-AI-interaction?
+│
+└─ OPPORTUNITY 4: "My AI chats are disconnected from my notes —
+    I have to re-explain context every time"
+    │
+    ├─ Solution I: Embedded AI chat with thread-to-note binding
+    │   └─ Test: Do users return to the same thread across sessions?
+    │
+    ├─ Solution J: One-click context injection into the chat
+    │   └─ Test: How many clicks to go from note to AI interaction?
+    │
+    └─ Solution K: Export chat back into vault (synthesis note)
+        └─ Test: Do users want AI outputs persisted in their vault?
+```
+
+### What this tree tells us
+
+- **Opportunities 1 and 2 are pre-requisites** — you can't bundle context or chat intelligently without knowing what's similar and what's missing
+- **Solution C (gap overlay) is our differentiator** — no other Obsidian plugin shows the delta between semantic similarity and graph connectivity
+- **Opportunities 3 and 4 share a solution** — bundles are the bridge between discovery and action; chat is a consumer of bundles
 
 ---
 
-## 3. Vision
+## 3. Problem Statements
 
-GrokNotes adds a **semantic context layer** to Obsidian that sits alongside — never replaces — the existing wikilink graph. It enables a three-part workflow:
+### 3.1 Discovery
 
-| Layer | What it does | For whom |
+A vault of 1,000+ notes accumulates knowledge faster than any human can index. Users know a relevant note exists — they wrote it — but Obsidian's existing search is keyword-only. Semantic similarity (the ability to find notes that *mean* the same thing even when they use different words) requires an external layer. Without it, the vault's value degrades as it grows: more notes means more noise, not more signal.
+
+**Don't build:** "a better search."
+**Build:** A discovery mechanism that surfaces what's relevant to what you're currently working on, ranked by meaning, not keyword match.
+
+### 3.2 Gap Detection
+
+The most valuable connections in a knowledge graph are the ones that don't exist yet. When two notes share a subject but lack a [[wikilink]], that's a structural hole — a missed opportunity for synthesis. Obsidian's graph view shows you only what *is* connected. It cannot show you what *should be* connected. The absence of a link is invisible unless you know to look for it.
+
+**Don't build:** "a link recommender."
+**Build:** A signal that compares semantic proximity against actual connectivity and surfaces the delta — with an action to close it.
+
+### 3.3 Context Bundles
+
+Project-based knowledge work requires gathering, curating, and reusing the same sets of notes across multiple sessions. Currently this is manual: open relevant notes, copy contents, paste into AI or share with a collaborator. The act of curating is valuable — it forces you to be selective — but the result is ephemeral. There's no durable artifact that says "these 8 notes are the context for *this project*" that persists across days and weeks.
+
+**Don't build:** "saved searches."
+**Build:** A first-class artifact — named, curated, prunable, exportable context bundles that you create once and inject anywhere.
+
+### 3.4 Smart Chat
+
+AI chat threads are disconnected from the knowledge they reference. A conversation about the MeshCore protocol revision lives in ChatGPT's history; the notes it references live in Obsidian. Re-establishing context on return means re-gathering and re-pasting. Thread-to-note binding solves this permanently — the chat knows what it's about because it's linked to the note that defines the project.
+
+**Don't build:** "AI in Obsidian."
+**Build:** A chat surface where context is automatically scoped to what the user has curated, and the thread's identity is the project note it's attached to.
+
+---
+
+## 4. Success Metrics
+
+| Layer | Primary metric | Target | Qualitative signal |
+|---|---|---|---|
+| **Discovery** | Notes discovered per session via semantic panel | 3+ notes/session | "I forgot I had that note" |
+| **Gap Detection** | Gaps converted to links per week | 5+/week | "These shouldn't have been disconnected" |
+| **Context Bundles** | Bundles created per user in first 30 days | 3+ | "I keep coming back to the same bundle" |
+| **Smart Chat** | Chat sessions per week with injected bundle | 5+ | "I didn't leave Obsidian all afternoon" |
+
+**Countermetric to watch for all layers:** Time spent managing GrokNotes exceeds time saved. If the plugin creates more overhead than it eliminates, we failed.
+
+---
+
+## 5. Scope
+
+### 5.1 What We're Building
+
+| Layer | Description |
+|---|---|
+| **Vector Index** | A semantic index of the vault that maps notes by meaning, not keywords |
+| **Discovery Panel** | Right-sidebar view showing similar notes for the active note, with similarity scores and source passages |
+| **Gap Overlay** | Visual indicator of which similar notes are linked vs unlinked, with one-click link creation |
+| **Context Bundles** | Named, durable collections of notes — create, curate, prune, name, inject |
+| **Smart Chat** | Embedded chat panel with thread-to-note binding and one-click context bundle injection |
+
+### 5.2 What We're NOT Building
+
+These are explicit boundaries, not future aspirations. They protect the scope of v0.1.
+
+- **No second graph.** We read Obsidian's [[wikilink]] structure. We don't maintain a parallel graph ontology. The vector index is similarity, not structure.
+- **No server or cloud.** Everything runs locally. The vector index is a local file. No accounts, no sync, no SaaS.
+- **No auto-linking.** Suggestions only. The human decides what to connect.
+- **No full-vault AI access.** AI receives only what the user explicitly provides via context bundles.
+- **No mobile support** in v0.1. Obsidian mobile plugin API constraints defer this.
+- **No custom embedding model training.** We use existing off-the-shelf models.
+- **No multi-vault features.** The plugin operates on a single vault.
+- **No real-time collaboration.**
+- **No separate graph visualization** — the existing Obsidian graph view is sufficient.
+
+---
+
+## 6. Edge Cases
+
+| Edge case | Status |
+|---|---|
+| New note created — index doesn't know about it yet | Background re-index triggers on file create; panel shows "indexing" state |
+| Note deleted — stale vector entry | Index cleanup on file delete; periodic full compaction |
+| Note renamed — vectors stale | Index update on file rename (Obsidian provides rename event) |
+| Vault has no [[wikilinks]] at all | Gap detection degrades gracefully to "all notes are discovery" mode |
+| Vault exceeds 50,000 notes | Index build time is the constraint; progress bar in status bar |
+| Obsidian vault is on a synced filesystem (git, iCloud, Obsidian Sync) | Index travels with vault if stored in vault dir; rebuild-from-scratch as recovery path |
+| User has multiple vaults | One index per vault; plugin instance per window |
+| Embedding model fails to load (OOM, missing dependency) | Plugin loads without vector layer; clear error message; fallback panels |
+| Context bundle references a deleted note | Bundle shows "missing" state; user can remove from bundle |
+| Chat thread saved before plugin update | Thread format versioning; migration path on load |
+
+---
+
+## 7. Open Questions
+
+These are explicitly unresolved — to be answered through prototyping and research.
+
+- [ ] What embedding model provides the best quality-to-latency ratio on consumer hardware for note-length content (200–5000 words)?
+- [ ] Should the vector index be stored inside the vault directory (portable across sync) or in Obsidian's plugin data directory (isolated)?
+- [ ] How does incremental indexing handle binary files, images, and excluded folders?
+- [ ] What's the minimum similarity threshold for showing a note as "related" before it becomes noise?
+- [ ] Should context bundles support nesting? (A bundle within a bundle?)
+- [ ] How many chat threads per note before the UI becomes unwieldy?
+- [ ] Should bundles be exportable to a shareable format (Markdown, text) for non-Obsidian users?
+- [ ] Does the gap signal benefit from a "gap severity" ranking, or is a binary linked/unlinked sufficient?
+
+---
+
+## 8. Deferred Decisions
+
+| Decision | Why deferred | When to revisit |
 |---|---|---|
-| **Discover** | Shows notes semantically similar to your active note, ranked by relevance | Anyone finding their own knowledge |
-| **Surface Gaps** | Highlights similar notes that *lack* a [[wikilink]] — and offers to create one | Serious knowledge workers building durable connections |
-| **Bundle** | Lets you save, name, curate, and reuse sets of notes as project context | Project-based workers, AI users |
-| **Chat** | Embedded AI chat that receives the current context bundle | Anyone using AI with their notes |
-
-The core insight: **value increases at the intersection of the semantic and the structural.** Vector similarity tells you what's *about* the same thing. The wikilink graph tells you what's *connected*. The delta between them — highly similar but unlinked — is where the highest-value interventions live.
-
----
-
-## 4. Target Audience
-
-**Primary:** Obsidian users who maintain a substantial vault (>500 notes) and actively use AI tools (ChatGPT, Claude, local LLMs) for knowledge work — writers, researchers, engineers, students, solopreneurs.
-
-**Secondary:** Anyone who uses Obsidian and has felt the frustration of knowing a note exists somewhere but not being able to find it.
-
-**Not for:** Users with small vaults (<100 notes), users who don't care about cross-note discovery, or users who exclusively use Obsidian for daily journaling with no long-term knowledge graph ambitions.
+| Embedding model selection | Multiple viable options; needs prototyping on real vaults | After first prototype with baseline model |
+| Vector index storage location | Implications for sync and portability need real-world testing | After first prototype |
+| Bundle auto-suggest from note clusters | Value proposition unclear without usage data | After 10+ manual bundles created by dogfood users |
+| Thread persistence format | Obsidian's data storage API or sidecar file? | During smart chat implementation |
+| Multi-LLM provider support | OpenAI-compatible API first; plugin architecture later | After smart chat ships |
+| Bundle export format | Markdown + frontmatter or plain text? | First user request for sharing |
 
 ---
 
-## 5. User Stories
+## 9. Decision Log
 
-### 5.1 Discovery
+### 9.1 Don't force Cashew into Obsidian
 
-- **As a** knowledge worker, **I want to** see notes related to the note I'm currently editing, **so that** I can rediscover relevant knowledge I've already captured.
+**Date:** 2026-05-31
+**Status:** Accepted
 
-- **As a** researcher, **I want to** see *why* a note is considered related (which specific passages triggered the similarity), **so that** I can judge relevance without opening every candidate.
+**Context:** We maintain the Cashew thought graph (224K nodes, 1.2M edges) as a Hermes memory substrate. Initial instinct was to replicate this inside Obsidian as the plugin's graph layer. But Obsidian already owns the wikilink graph — it's the canonical source of truth for explicit connections between notes. Importing Cashew's typed-edge model (observations, insights, cross-links) alongside Obsidian's existing graph would create two sources of truth for connectivity, with no clear reconciliation path.
 
-- **As a** writer, **I want to** see my vault's embeddings update as I write, **so that** new connections appear in real-time.
+**Options considered:**
 
-### 5.2 Gap Detection
-
-- **As a** Zettelkasten practitioner, **I want to** see a list of notes that are semantically similar to my active note but *not* linked to it, **so that** I can close knowledge gaps by adding [[wikilinks]].
-
-- **As a** project manager, **I want to** see clusters of notes that *should* be connected based on shared themes but aren't, **so that** I can ensure my project knowledge graph is structurally sound.
-
-- **As an** LLM power user, **I want to** select a gap suggestion and have the plugin ask an LLM to generate a synthesis note, **so that** I can bridge disconnected knowledge domains with minimal friction.
-
-### 5.3 Context Bundles
-
-- **As a** project-based worker, **I want to** save a curated set of notes as a named context bundle (e.g., "MeshCore Protocol Work"), **so that** I can return to it across sessions.
-
-- **As a** collaborator, **I want to** export a context bundle to share with a teammate, **so that** they can get up to speed without navigating my entire vault.
-
-- **As an** AI user, **I want to** keep context bundles that auto-update as I add or edit notes, **so that** I'm always injecting current information, not stale snapshots.
-
-### 5.4 Smart Chat
-
-- **As an** AI user, **I want to** start a chat within Obsidian that already has my current context bundle loaded, **so that** I don't have to copy-paste notes.
-
-- **As a** multi-project worker, **I want to** have multiple AI threads linked to different project notes, **so that** each conversation stays scoped to its project.
-
-- **As a** privacy-conscious user, **I want to** see exactly what context the AI can access before sending a message, **so that** I never accidentally expose notes outside my intended scope.
-
----
-
-## 6. Core Concepts
-
-### 6.1 Semantic Proximity
-
-A measure of how closely two notes relate by *meaning* rather than by explicit link. Computed from the full text of each note, not just titles or tags. Delivered as a similarity score (0–100 or similar) with identifiable source passages.
-
-### 6.2 The Gap Signal
-
-The intersection of two axes: **semantic similarity** (from the vector layer) and **graph connectivity** (from Obsidian's [[wikilink]] graph). The four quadrants:
-
-| | Linked in vault | Unlinked |
+| Option | Pros | Cons |
 |---|---|---|
-| **High similarity** | Confirmed connection | ⚠️ **Gap** — should likely be linked |
-| **Low similarity** | Cross-domain curiosity | Normal unrelated notes |
+| A: Embed Cashew in the plugin | Richer graph (typed edges, insights) | Dual truth, Obsidian drift, dependency overhead |
+| B: Read-only Cashew sync | Leverage existing graph without conflict | Requires running Hermes; breaks offline assumption |
+| C: **Vector-only. No second graph.** (chosen) | Clean architecture, one truth, portable | No typed edges — just similarity scores |
 
-The gap quadrant is the primary intervention point.
+**Rationale:** The value we bring is not a better graph — it's a *semantic overlay* that the existing graph doesn't have. Vector similarity is additive, not conflicting. Adding a second graph would create reconciliation problems that add complexity without clear user benefit.
 
-### 6.3 Named Context Bundles
+**Expected outcome:** The plugin discovers notes by meaning, uses Obsidian's [[wikilink]] graph to determine connectivity, and surfaces the delta. No graph conflicts. Users see one graph (Obsidian's) with one enhancement (the semantic layer).
 
-A durable, named collection of notes curated for a specific purpose (project, theme, client, research thread). Features:
-- Created manually by selecting notes or auto-suggested from semantic proximity
-- Prunable — remove noise, keep signal
-- Versioned or updateable as vault changes
-- Exportable (markdown, text, clipboard)
-- Injectible into chat or external tools
-
-### 6.4 Chat-Thread-to-Note Binding
-
-An AI conversation thread that is permanently associated with a specific note (and optionally a specific context bundle). Survives vault restarts. Supports multiple threads per note (archived/active). Guarantees the AI always has the relevant context without requiring the user to re-establish scope.
+**Signal to reconsider:** Users consistently ask for typed edges or "why" explanations that pure vector similarity can't provide.
 
 ---
 
-## 7. Principles (Design Coherence)
+### 9.2 The gap signal is our differentiator
 
-These principles guide every decision about what GrokNotes should and shouldn't do:
+**Date:** 2026-05-31
+**Status:** Accepted
 
-1. **Obsidian is the source of truth for the graph.** GrokNotes never manages a second graph. It reads Obsidian's [[wikilink]] structure to determine connectivity. It does not create its own parallel graph ontology.
+**Context:** Smart Connections (Wanderloots) already provides semantic similarity in Obsidian. If GrokNotes only replicates that, it brings nothing new. The unique value proposition must be something Smart Connections doesn't do.
 
-2. **The human decides.** All suggestions are advisory. GrokNotes surfaces gaps, bundles, and connections — but never auto-creates links or auto-injects context without explicit action. AI synthesis is opt-in per action.
+**Options considered:**
 
-3. **One semantic layer, one substrate.** The vector index is a single, portable dependency. No servers, no daemons, no Docker. The plugin manages its own index and keeps it current.
-
-4. **Privacy by architecture.** The vector index lives in the vault. No data leaves the machine unless the user explicitly copies context to an external AI tool. AI access is always scoped to what the user explicitly provides — never the full vault.
-
-5. **The delta is the value.** The most important information GrokNotes provides is not what's similar, but what's similar-and-not-connected. The gap signal is the differentiator from every other semantic plugin.
-
-6. **Context is a first-class object.** Named context bundles are as important as individual notes. They can be created, saved, named, curated, reused, and shared. They are not merely query results — they are user-owned artifacts.
-
-7. **Works offline first.** The entire core workflow (discovery, gap detection, bundle management) functions without network access. AI features (synthesis, chat) require a configured LLM provider but are additive, not foundational.
-
----
-
-## 8. Success Criteria
-
-### 8.1 Functional Must-Haves (v0.1)
-
-- [ ] Plugin loads in Obsidian without errors
-- [ ] Vector index builds from vault content on install
-- [ ] Index updates incrementally on note create/edit/delete
-- [ ] Side panel shows semantically similar notes for the active note
-- [ ] Side panel indicates which similar notes are linked vs unlinked
-- [ ] User can create a named context bundle from selected notes
-- [ ] User can inject a context bundle into an AI chat within Obsidian
-- [ ] Chat thread persists and stays tied to its note across restarts
-
-### 8.2 Quality Gates
-
-- **Index build time:** < 5 minutes for 10,000 notes (background, non-blocking)
-- **Query latency:** < 500ms for similarity lookup on active note
-- **Bundle injection:** < 2 seconds for a bundle of 20 notes
-- **Memory footprint:** < 200 MB RSS above baseline Obsidian
-
-### 8.3 Non-Goals (explicit out-of-scope for v0.1)
-
-- Multi-vault sync or cloud features
-- Real-time collaborative editing
-- Mobile support (Obsidian mobile plugin API constraints)
-- Custom LLM fine-tuning
-- A separate graph visualization (uses Obsidian's existing graph view)
-- Import/export to other PKM tools
-- Team/shared context bundles
-
----
-
-## 9. User Experience Sketch
-
-### 9.1 The Discovery Panel (Right Sidebar)
-
-When a note is active, the panel shows:
-
-```
-┌─────────────────────────────┐
-│  GrokNotes                  │
-│                             │
-│  ▸ Related Notes (12)       │
-│                             │
-│    MeshCore Payload Limits  │  92% ● ●
-│    LoRa Modulation Tradeoffs│  87% ● ○  [Link?]
-│    Core Protocol Spec       │  84% ● ●
-│    Antenna Design Notes     │  71% ● ○  [Link?]
-│    BLE vs LoRa Comparison   │  65% ● ●
-│                             │
-│  ● = linked  ○ = unlinked  │
-│                             │
-│  [Create Bundle] [Chat]     │
-└─────────────────────────────┘
-```
-
-### 9.2 The Bundle Manager
-
-A dedicated view (modal or tab) for managing context bundles:
-
-```
-┌──────────────────────────────────┐
-│  GrokNotes Context Bundles       │
-│                                  │
-│  [New Bundle]                    │
-│                                  │
-│  ┌──────────────────────────────┐│
-│  │ MeshCore Protocol Work       ││
-│  │  8 notes · last used 2d ago ││
-│  │  [Inject] [Edit] [Export]   ││
-│  └──────────────────────────────┘│
-│  ┌──────────────────────────────┐│
-│  │ Portia Spider Research      ││
-│  │  5 notes · last used 1w ago ││
-│  │  [Inject] [Edit] [Export]   ││
-│  └──────────────────────────────┘│
-└──────────────────────────────────┘
-```
-
-### 9.3 Smart Chat
-
-An embedded chat panel that receives the current context bundle:
-
-```
-┌───────────────────────────────┐
-│  💬 LLM Wiki Project          │
-│  Context: MeshCore Core (8n)  │
-│                               │
-│  ┌─────────────────────────┐  │
-│  │ Based on my notes, what │  │
-│  │ should I prioritize for │  │
-│  │ the next protocol       │  │
-│  │ revision?               │  │
-│  └─────────────────────────┘  │
-│                               │
-│  [Send]  [Replace Context]    │
-└───────────────────────────────┘
-```
-
----
-
-## 10. Open Questions (For the Ideation Phase)
-
-These are deliberately unresolved — to be answered through prototyping and discussion:
-
-1. **Embedding model selection** — What model provides the best semantic accuracy for note-length content (100–5000 words) on consumer hardware? Tradeoff between quality and latency.
-
-2. **Index update strategy** — Full re-index vs incremental on file change? How to handle deleted notes gracefully?
-
-3. **Bundle storage format** — Plain JSON sidecar file within the vault? A sqlite table alongside the vector index? Obsidian metadata cache?
-
-4. **Thread persistence** — How to store chat threads that survive vault restarts? Obsidian's own data storage API vs a sidecar file.
-
-5. **LLM provider abstraction** — OpenAI-compatible API endpoint only, or plugin architecture for multiple providers? What's the minimum viable surface?
-
-6. **Multi-device support** — If the vault is synced (Obsidian Sync, git, iCloud), does the plugin state travel with it gracefully?
-
-7. **The "inbox" question** — Should there be a persistent queue of gap suggestions that accumulates as you work, or only live suggestions for the active note?
-
----
-
-## 11. Relationship to Existing Ecosystem
-
-| Tool | What it does | How GrokNotes differs |
+| Option | Pros | Cons |
 |---|---|---|
-| **Smart Connections** (Wanderloots) | Vector similarity panel | Adds the **gap signal** (similar + unlinked = actionable), plus context bundles as first-class objects, plus embedded chat |
-| **Obsidian Graph View** | Native wikilink graph | Adds the **semantic overlay** — notes that *aren't* linked but *should be* |
-| **Obsidian Copilot** | AI chat in Obsidian | Adds **scoped context injection** — the AI only sees what you've curated, not whatever note is active |
-| **Obsidian AI** (various) | LLM features | Adds the **discovery → bundle → chat** pipeline as an integrated workflow, not isolated features |
-| **Dataview** | Query notes by metadata | GrokNotes queries by *meaning*, not by frontmatter fields |
-| **Graph Analysis (community)** | Graph metrics | GrokNotes adds a **second signal** (semantic proximity) to compare against graph connectivity |
+| A: Better similarity (faster, more accurate) | Incremental improvement | Mooré's law catches up; not defensible |
+| B: **Cross-reference similarity against graph connectivity** (chosen) | Truly unique signal; no other plugin does this | Requires both vector index AND graph read |
+| C: Knowledge graph export | Valuable for research users | Narrower audience |
+
+**Rationale:** The intersection of two independent signals — "what's similar" (vector) and "what's connected" (graph) — produces a quadrant that no other tool surfaces. The gap quadrant (high similarity + unlinked) is actionable, specific, and unique. It's not a better version of an existing feature; it's a new category of signal.
+
+**Expected outcome:** Users report discovering connections they genuinely didn't know were missing — not just "here are some related notes I already knew about."
+
+**Signal to reconsider:** Users only use the discovery panel and ignore the gap indicators entirely.
 
 ---
 
-## 12. Risks and Mitigations
+### 9.3 Context bundles are first-class artifacts
+
+**Date:** 2026-05-31
+**Status:** Accepted
+
+**Context:** The natural end-state of the discovery → gap → bundle pipeline is a reusable asset. In the Wanderloots video, context bundles were demonstrably the most powerful part of the workflow — a durable named set that persists, updates, and can be injected with one click. Without bundles, every discovery session starts from zero.
+
+**Options considered:**
+
+| Option | Pros | Cons |
+|---|---|---|
+| A: **Named, curated, persistent bundles** (chosen) | Most powerful for project workers | Requires bundle management UI (scope) |
+| B: Ephemeral selection (select notes, use once, discard) | Less UI surface | No reusability; each session starts fresh |
+| C: Only auto-suggested bundles (no manual curation) | Zero effort for user | Trust issues — auto-suggested bundles may miss or include wrong notes |
+
+**Rationale:** Bundles are the artifact that makes the workflow durable. A bundle you curated last week and injected today is worth more than a fresh query you run every session. Manual curation is non-negotiable — the act of pruning creates trust in the context.
+
+**Expected outcome:** Users build a small library of context bundles (3-10) that they reuse across sessions. The bundle becomes as important as any individual note.
+
+**Signal to reconsider:** Users create bundles once and never update them.
+
+---
+
+## 10. Prioritization (RICE)
+
+| Layer | Reach (users/q) | Impact | Confidence | Effort (weeks) | RICE Score |
+|---|---|---|---|---|---|
+| **Discovery panel** | 10,000 | 2 (High) | 80% | 2 | 8,000 |
+| **Gap overlay** | 5,000 | 3 (Massive) | 70% | 2 | 5,250 |
+| **Context bundles** | 3,000 | 2 (High) | 60% | 3 | 1,200 |
+| **Smart chat** | 2,000 | 2 (High) | 50% | 4 | 500 |
+
+**Analysis:**
+
+- **Ship in order: Discovery → Gaps → Bundles → Chat.** Each layer feeds the next. Discovery is the foundation. Gaps layer on top by cross-referencing against the graph. Bundles consume discovery results. Chat consumes bundles.
+- **Discovery ships first** because it's highest reach, highest confidence, lowest effort, and is a pre-requisite for everything else.
+- **Gaps ships second** because it's our unique value proposition and builds directly on the discovery layer with zero additional infrastructure.
+- **Bundles and Chat are higher risk** (lower confidence) and depend on usage patterns we can't predict until Discovery and Gaps are in users' hands. Deferring them doesn't block value delivery.
+
+---
+
+## 11. Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Embedding model too slow on large vaults | Medium | High | Background indexing, incremental updates, model choice |
-| sqlite-vec incompatibility with Obsidian's Electron runtime | Medium | Critical | Prototype early, fall back to simple flat-file vector store |
-| Users don't trust AI suggestions | Medium | Medium | Always show *why* (source passages), always require human confirmation |
-| Feature creep / bloated plugin | High | Medium | Strict non-goals list, modular architecture, ship thin |
-| Obsidian API changes break plugin | Low | High | Isolate API-dependent code behind thin adapter layer |
-| Vector index sync conflicts across devices | Medium | Medium | Support rebuild-from-scratch as first-class recovery path |
+| Embedding model incompatible with Obsidian's Electron runtime | Medium | Critical | Prototype sqlite-vec in Electron early; have flat-file fallback |
+| Index build time unacceptable on large vaults | Medium | High | Background incremental indexing; progress indicators |
+| Users don't trust the gap signal ("these aren't actually related") | Medium | Medium | Show source passages for similarity; let users override suggestions |
+| Feature creep from "one more thing" requests | High | Medium | Strict non-goals list; each layer is a discrete shippable unit |
+| Dual-source-of-truth creep (plugin starts caching graph state) | Low | High | Design principle explicitly forbids it; enforce in architecture |
+| Smart Connections already occupies the "semantic Obsidian" mindshare | Medium | Medium | Differentiate on gap signal, not similarity quality. Don't compete on the same axis. |
+| Vector index conflicts on synced vaults | Medium | Low | Rebuild-from-scratch is always available; index is a cache, not source of truth |
 
 ---
 
-## 13. Next Steps
+## 12. Principles (Design Coherence)
 
-1. **Prototype the vector layer** — Can sqlite-vec run inside Obsidian's Electron runtime? Embedding model benchmarking on note-length text.
-2. **Build the discovery panel** — Minimal viable panel showing similar notes with link/unlink status.
-3. **Implement gap detection** — Cross-reference similarity results against Obsidian's [[wikilink]] graph.
-4. **Ship context bundles** — Create, name, curate, inject. The bundle as a first-class artifact.
-5. **Wire smart chat** — Embedded chat that accepts a context bundle with one click.
-6. **Dogfood** — Use it on the groktopus vault for a week. Find the rough edges.
+1. **Obsidian is the source of truth for the graph.** The plugin reads [[wikilinks]] to determine connectivity. It never creates a second graph.
+
+2. **The human decides.** All suggestions are advisory. No auto-linking, no auto-injection. AI synthesis is opt-in per action.
+
+3. **One semantic layer, one substrate.** The vector index is a single portable dependency. No servers. No daemons.
+
+4. **Privacy by architecture.** The index lives in the vault. AI access is scoped to what the user explicitly provides — never the full vault.
+
+5. **The delta is the value.** The gap signal (similar + unlinked) is the primary differentiator from every other semantic plugin.
+
+6. **Context is a first-class object.** Named bundles are as important as individual notes. They can be created, saved, curated, reused, and shared.
+
+7. **Works offline first.** Core workflow (discovery, gaps, bundles) functions without network. AI features are additive, not foundational.
 
 ---
 
-*This document is a living artifact of the ideation phase. It will change as we learn what works and what doesn't. Nothing here is final until it ships.*
+## 13. Relationship to Existing Ecosystem
+
+| Tool | What it does | How GrokNotes differs |
+|---|---|---|
+| **Smart Connections** | Vector similarity panel | Adds the gap signal (similar + unlinked = actionable), plus bundles, plus chat |
+| **Obsidian Graph View** | Native wikilink graph | Adds semantic overlay — what *should* be connected but isn't |
+| **Obsidian Copilot** | AI chat in Obsidian | Adds scoped context injection via bundles |
+| **Dataview** | Query by frontmatter | Queries by *meaning*, not metadata fields |
+| **Various AI plugins** | Varying LLM integrations | Adds the discovery → bundle → chat pipeline as an integrated workflow |
+
+---
+
+## 14. Next Steps
+
+| Step | Deliverable | Depends on |
+|---|---|---|
+| 1. Validate sqlite-vec in Electron | Confirmed working or fallback plan | Nothing |
+| 2. Embedding model bakeoff | Recommendation with latency/quality data | Step 1 |
+| 3. Prototype discovery panel | Working panel showing similar notes with scores | Step 2 |
+| 4. Implement gap detection | Panel shows linked/unlinked status per result | Step 3 |
+| 5. Ship v0.1-alpha | Discovery + Gaps, no bundles, no chat | Step 4 |
+| 6. Prototype context bundles | Create, name, curate, inject | Step 5 |
+| 7. Prototype smart chat | Embedded chat + thread binding | Step 6 |
+| 8. Dogfood for 2 weeks | Usage data, bug reports, UX feedback | Step 5 |
+| 9. Ship v0.1-beta | All four layers | Step 7 + Step 8 |
+| 10. Public release | Plugin listed in Obsidian community | Step 9 |
+
+---
+
+*This document is a living artifact of the ideation phase. Decisions here will change as we learn. Anything not explicitly decided is intentionally open.*
+
+---
+
+## Appendix A: Key Decisions Log (Summary)
+
+| # | Decision | Rationale | Date |
+|---|---|---|---|
+| 001 | Vector-only. No second graph. | Obsidian owns the graph; vector similarity is additive | 2026-05-31 |
+| 002 | Gap signal is the differentiator | Similarity + connectivity delta is unique and actionable | 2026-05-31 |
+| 003 | Bundles are first-class artifacts | Curated, named, durable — not ephemeral selections | 2026-05-31 |
+| 004 | Ship order: Discovery → Gaps → Bundles → Chat | Each layer feeds the next | 2026-05-31 |
